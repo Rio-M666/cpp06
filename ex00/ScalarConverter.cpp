@@ -53,6 +53,7 @@ bool isFloat(const std::string &literal)
     if (literal[literal.length() - 1] != 'f')
         return false;
     int dot = 0;
+    bool hasDigit = false;
     while (i < literal.length() - 1)
     {
         if (literal[i] == '.')
@@ -63,9 +64,11 @@ bool isFloat(const std::string &literal)
         }
         else if (!std::isdigit(literal[i]))
             return false;
+        else
+            hasDigit = true;
         i++;
     }
-    return dot == 1;
+    return dot == 1 && hasDigit;
 }
 
 bool isDouble(const std::string &literal)
@@ -76,6 +79,7 @@ bool isDouble(const std::string &literal)
     if (literal[i] == '+' || literal[i] == '-')
         i++;
     int dot = 0;
+    bool hasDigit = false;
     while (i < literal.length())
     {
         if (literal[i] == '.')
@@ -86,16 +90,24 @@ bool isDouble(const std::string &literal)
         }
         else if (!std::isdigit(literal[i]))
             return false;
+        else
+            hasDigit = true;
         i++;
     }
-    return dot == 1;
+    return dot == 1 && hasDigit;
 }
 
 void ScalarConverter::convert(const std::string &literal)
 {
     if (literal == "nan" || literal == "+inf" || literal == "-inf" || literal == "nanf" || literal == "+inff" || literal == "-inff")
     {
-        std::cout << "special" << std::endl;
+        std::string doubleText = literal;
+        if (literal == "nanf" || literal == "+inff" || literal == "-inff")
+            doubleText = literal.substr(0, literal.length() - 1);
+        std::cout << "char: impossible" << std::endl;
+        std::cout << "int: impossible" << std::endl;
+        std::cout << "float: " << doubleText << "f" << std::endl;
+        std::cout << "double: " << doubleText << std::endl;
     }
     else if (isChar(literal))
     {
@@ -135,13 +147,33 @@ void ScalarConverter::convert(const std::string &literal)
             std::cout << "impossible" << std::endl;
         else
             std::cout << static_cast<int>(value) << std::endl;
-        std::cout << "float: " << f << ".0f" << std::endl;
-        std::cout << "double: " << d << ".0" << std::endl;
+        std::ostringstream floatStream;
+        floatStream << f;
+        std::string floatText = floatStream.str();
+        if (floatText.find_first_of(".eE") == std::string::npos)
+            floatText += ".0";
+        std::cout << "float: " << floatText << "f" << std::endl;
+
+        std::ostringstream doubleStream;
+        doubleStream << d;
+        std::string doubleText = doubleStream.str();
+        if (doubleText.find_first_of(".eE") == std::string::npos)
+            doubleText += ".0";
+        std::cout << "double: " << doubleText << std::endl;
     }
 
     else if (isFloat(literal))
     {
-        float value = std::atof(literal.c_str());
+        double parsed = std::atof(literal.c_str());
+        if (parsed > FLT_MAX || parsed < -FLT_MAX)
+        {
+            std::cout << "char: impossible" << std::endl;
+            std::cout << "int: impossible" << std::endl;
+            std::cout << "float: impossible" << std::endl;
+            std::cout << "double: impossible" << std::endl;
+            return;
+        }
+        float value = static_cast<float>(parsed);
         std::cout << "char: ";
         if (value < 0 || value > 127)
             std::cout << "impossible";
