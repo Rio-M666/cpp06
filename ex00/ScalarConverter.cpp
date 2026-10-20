@@ -1,6 +1,9 @@
 #include "ScalarConverter.hpp"
 #include <cctype>
 #include <cstdlib>
+#include <climits>
+#include <cfloat>
+#include <sstream>
 
 ScalarConverter::ScalarConverter()
 {
@@ -111,7 +114,7 @@ void ScalarConverter::convert(const std::string &literal)
     }
     else if (isInt(literal))
     {
-        int value = std::atoi(literal.c_str());
+        long value = std::atol(literal.c_str());
 
         char c = static_cast<char>(value);
         float f = static_cast<float>(value);
@@ -127,17 +130,89 @@ void ScalarConverter::convert(const std::string &literal)
         else
             std::cout << "'" << c << "'";
         std::cout << std::endl;
-        std::cout << "int: " << value << std::endl;
+        std::cout << "int: ";
+        if (value > INT_MAX || value < INT_MIN)
+            std::cout << "impossible" << std::endl;
+        else
+            std::cout << static_cast<int>(value) << std::endl;
         std::cout << "float: " << f << ".0f" << std::endl;
         std::cout << "double: " << d << ".0" << std::endl;
     }
+
     else if (isFloat(literal))
     {
-        std::cout << "float" << std::endl;
+        float value = std::atof(literal.c_str());
+        std::cout << "char: ";
+        if (value < 0 || value > 127)
+            std::cout << "impossible";
+        else
+        {
+            char c = static_cast<char>(value);
+            if (!std::isprint(static_cast<unsigned char>(c)))
+                std::cout << "Non displayable";
+            else
+                std::cout << "'" << c << "'";
+        }
+        std::cout << std::endl;
+        double d = static_cast<double>(value);
+        std::cout << "int: ";
+        if (d > INT_MAX || d < INT_MIN)
+            std::cout << "impossible" << std::endl;
+        else
+            std::cout << static_cast<int>(value) << std::endl;
+        std::ostringstream floatStream;
+        floatStream << value;
+        std::string floatText = floatStream.str();
+        if (floatText.find_first_of(".eE") == std::string::npos)
+            floatText += ".0";
+        std::cout << "float: " << floatText << "f" << std::endl;
+
+        std::ostringstream doubleStream;
+        doubleStream << d;
+        std::string doubleText = doubleStream.str();
+        if (doubleText.find_first_of(".eE") == std::string::npos)
+            doubleText += ".0";
+        std::cout << "double: " << doubleText << std::endl;
     }
     else if (isDouble(literal))
     {
-        std::cout << "double" << std::endl;
+        double value = std::atof(literal.c_str());
+        std::cout << "char: ";
+        if (value < 0 || value > 127)
+            std::cout << "impossible";
+        else
+        {
+            char c = static_cast<char>(value);
+            if (!std::isprint(static_cast<unsigned char>(c)))
+                std::cout << "Non displayable";
+            else
+                std::cout << "'" << c << "'";
+        }
+        std::cout << std::endl;
+        std::cout << "int: ";
+        if (value > INT_MAX || value < INT_MIN)
+            std::cout << "impossible" << std::endl;
+        else
+            std::cout << static_cast<int>(value) << std::endl;
+        std::cout << "float: ";
+        if (value > FLT_MAX || value < -FLT_MAX)
+            std::cout << "impossible" << std::endl;
+        else
+        {
+            float f = static_cast<float>(value);
+            std::ostringstream stream;
+            stream << f;
+            std::string text = stream.str();
+            if (text.find_first_of(".eE") == std::string::npos)
+                text += ".0";
+            std::cout << text << "f" << std::endl;
+        }
+        std::ostringstream stream;
+        stream << value;
+        std::string text = stream.str();
+        if (text.find_first_of(".eE") == std::string::npos)
+            text += ".0";
+        std::cout << "double: " << text << std::endl;
     }
     else
         std::cout << "Invalid" << std::endl;
